@@ -1,0 +1,111 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: lims-gateway-service
+
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - "http://localhost:3000"
+              - "https://*.sivayahealth.com"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            exposedHeaders:
+              - "X-Request-Id"
+              - "X-Tenant-Id"
+              - "X-Branch-Id"
+              - "X-Department-Id"
+            allowCredentials: true
+            maxAge: 3600
+
+      routes:
+        # /api/auth/login -> /login
+        # /api/auth/me    -> /me
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=2
+
+        - id: document-service
+          uri: ${DOCUMENT_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/documents/**
+          filters:
+            - StripPrefix=2
+
+        - id: approval-service
+          uri: ${APPROVAL_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/approvals/**
+          filters:
+            - StripPrefix=2
+
+        - id: inventory-service
+          uri: ${INVENTORY_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/inventory/**
+          filters:
+            - StripPrefix=2
+
+        - id: instrument-service
+          uri: ${INSTRUMENT_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/instruments/**
+          filters:
+            - StripPrefix=2
+
+        - id: execution-service
+          uri: ${EXECUTION_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/api/executions/**
+          filters:
+            - StripPrefix=2
+
+        - id: audit-service
+          uri: ${AUDIT_SERVICE_URL:http://localhost:8087}
+          predicates:
+            - Path=/api/audit/**
+          filters:
+            - StripPrefix=2
+
+        - id: reporting-service
+          uri: ${REPORTING_SERVICE_URL:http://localhost:8088}
+          predicates:
+            - Path=/api/reports/**
+          filters:
+            - StripPrefix=2
+
+gateway:
+  jwt:
+    secret: ${JWT_SECRET:change-this-to-a-very-long-secret-key-at-least-256-bits-long}
+    public-paths:
+      - /api/auth/login
+      - /api/auth/refresh
+      - /actuator/health
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.example.gateway: DEBUG
