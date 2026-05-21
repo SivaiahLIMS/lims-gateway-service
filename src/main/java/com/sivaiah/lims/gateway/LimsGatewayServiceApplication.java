@@ -10,4 +10,5 @@ public class LimsGatewayServiceApplication {
         SpringApplication.run(LimsGatewayServiceApplication.class, args);
     }
 
+    
 }
